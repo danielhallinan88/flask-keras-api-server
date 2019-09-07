@@ -12,7 +12,8 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 def load_models():
     global models
     models = {
-              'mnist' : load_model('models/mnist_model.hdf5')
+              'mnist'          : load_model('models/mnist_model.hdf5'),
+              'dog_classifier' : load_model('models/dog-classifier.weights.best.inception3.hdf5')
               }
 
     global graph
@@ -44,6 +45,20 @@ def mnist():
             return str(result)
         else:
             return "Please POST an image."
+
+@app.route('/dog-classifier', methods=['GET', 'POST'])
+def dog_classify():
+
+    with graph.as_default():
+        model = models['dog_classifier']
+
+        if request.method == 'POST':
+            data = request.files.get('image')
+            img  = Image.open(data)
+            img_arr = np.array(img, dtype='float32')
+            return str(img_arr.shape)
+        else:
+            return "POST dog image."
 
 if __name__ == "__main__":
     load_models()
