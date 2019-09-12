@@ -2,8 +2,10 @@ from PIL import Image
 from flask import Flask, request, jsonify
 from keras.models import load_model
 from keras.preprocessing.image import img_to_array
+from keras.applications.resnet50 import ResNet50
 import tensorflow as tf
 import numpy as np
+import cv2
 import os
 
 app = Flask(__name__)
@@ -12,12 +14,23 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 def load_models():
     global models
     models = {
-              'mnist'          : load_model('models/mnist_model.hdf5'),
-              'dog_classifier' : load_model('models/dog-classifier.weights.best.inception3.hdf5')
+              'mnist'            : load_model('models/mnist_model.hdf5'),
+              'dog_classifier'   : load_model('models/dog-classifier.weights.best.inception3.hdf5'),
+              'breed_classifier' : '',
+              'face_classifier'  : cv2.CascadeClassifier('models/haarcascade_frontalface_alt.xml'),
               }
 
     global graph
     graph = tf.get_default_graph()
+
+def is_human(gray):
+    model = models['face_classifier']
+    faces = model.detectMultiScale(gray)
+
+    return len(faces) > 0
+
+def is_dog(img_path):
+    pass
 
 @app.route('/')
 @app.route('/test', methods=["GET","POST"])
@@ -53,10 +66,15 @@ def dog_classify():
         model = models['dog_classifier']
 
         if request.method == 'POST':
+            # Preprocess image
             data = request.files.get('image')
-            img  = Image.open(data)
-            img_arr = np.array(img, dtype='float32')
-            return str(img_arr.shape)
+            # Convert image to grayscale
+            img     = Image.open(data)
+            gray    = cv2.cvtColor(np.float32(img), cv2.COLOR_BGR2GRAY)
+            gray    = np.array(gray, dtype='uint8')
+            human   = is_human(gray)
+            return str(human)
+
         else:
             return "POST dog image."
 
