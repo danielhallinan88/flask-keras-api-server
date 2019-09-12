@@ -1,7 +1,7 @@
 from PIL import Image
 from flask import Flask, request, jsonify
 from keras.models import load_model
-from keras.preprocessing.image import img_to_array
+from keras.preprocessing.image import img_to_array, load_img
 from keras.applications.resnet50 import ResNet50
 import tensorflow as tf
 import numpy as np
@@ -69,10 +69,12 @@ def dog_classify():
             # Preprocess image
             data = request.files.get('image')
             # Convert image to grayscale
-            img     = Image.open(data)
-            gray    = cv2.cvtColor(np.float32(img), cv2.COLOR_BGR2GRAY)
-            gray    = np.array(gray, dtype='uint8')
-            human   = is_human(gray)
+            #img     = Image.open(data)
+            #gray    = cv2.cvtColor(np.float32(img), cv2.COLOR_BGR2GRAY)
+            #gray    = np.array(gray, dtype='uint8')
+            img     = load_img(data, color_mode='grayscale')
+            img_arr = img_to_array(img, dtype='uint8')
+            human   = is_human(img_arr)
             return str(human)
 
         else:
