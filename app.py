@@ -2,7 +2,7 @@ from PIL import Image
 from flask import Flask, request, jsonify
 from keras.models import load_model
 from keras.preprocessing.image import img_to_array, load_img
-from keras.applications.resnet50 import ResNet50
+from keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
 import tensorflow as tf
 import numpy as np
 import cv2
@@ -16,21 +16,27 @@ def load_models():
     models = {
               'mnist'            : load_model('models/mnist_model.hdf5'),
               'dog_classifier'   : load_model('models/dog-classifier.weights.best.inception3.hdf5'),
-              'breed_classifier' : '',
+              'breed_classifier' : ResNet50(weights='imagenet'),
               'face_classifier'  : cv2.CascadeClassifier('models/haarcascade_frontalface_alt.xml'),
               }
 
     global graph
     graph = tf.get_default_graph()
 
-def is_human(gray):
+def is_human(img):
     model = models['face_classifier']
-    faces = model.detectMultiScale(gray)
+    faces = model.detectMultiScale(img)
 
     return len(faces) > 0
 
-def is_dog(img_path):
-    pass
+def is_dog(img):
+    model = models['breed_classifier']
+
+    img = cv2.resize(img, (224, 224))
+    img_4d = np.reshape(img, (1, img.shape[0], img.shape[1], img.shape[2]))
+    pred_label = np.argmax(model.predict(img_4d))
+
+    return ((pred_label >= 151) & (pred_label <= 268))
 
 @app.route('/')
 @app.route('/test', methods=["GET","POST"])
@@ -68,14 +74,19 @@ def dog_classify():
         if request.method == 'POST':
             # Preprocess image
             data = request.files.get('image')
-            # Convert image to grayscale
-            #img     = Image.open(data)
-            #gray    = cv2.cvtColor(np.float32(img), cv2.COLOR_BGR2GRAY)
-            #gray    = np.array(gray, dtype='uint8')
-            img     = load_img(data, color_mode='grayscale')
-            img_arr = img_to_array(img, dtype='uint8')
-            human   = is_human(img_arr)
-            return str(human)
+
+            # Grayscale image
+            img_gray  = load_img(data, color_mode='grayscale')
+            # Color image
+            img_color = load_img(data)
+
+            arr_gray  = img_to_array(img_gray, dtype='uint8')
+            arr_color = img_to_array(img_color)
+
+            human   = is_human(arr_gray)
+            dog     = is_dog(arr_color)
+            return str(dog)
+            #return "TESTING\n"
 
         else:
             return "POST dog image."
