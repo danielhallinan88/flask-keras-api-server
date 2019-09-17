@@ -2,9 +2,11 @@ from PIL import Image
 from flask import Flask, request, jsonify
 from keras.models import load_model
 from keras.preprocessing.image import img_to_array, load_img
-from keras.applications.resnet50 import ResNet50, preprocess_input, decode_predictions
+from keras.applications.resnet50 import ResNet50, decode_predictions
+from keras.applications.inception_v3 import InceptionV3, preprocess_input
 import tensorflow as tf
 import numpy as np
+import pickle
 import cv2
 import os
 
@@ -15,8 +17,8 @@ def load_models():
     global models
     models = {
               'mnist'            : load_model('models/mnist_model.hdf5'),
-              'dog_classifier'   : load_model('models/dog-classifier.weights.best.inception3.hdf5'),
-              'breed_classifier' : ResNet50(weights='imagenet'),
+              'breed_classifier' : load_model('models/dog-classifier.weights.best.inception3.hdf5'),
+              'dog_classifier'   : ResNet50(weights='imagenet'),
               'face_classifier'  : cv2.CascadeClassifier('models/haarcascade_frontalface_alt.xml'),
               }
 
@@ -30,13 +32,26 @@ def is_human(img):
     return len(faces) > 0
 
 def is_dog(img):
-    model = models['breed_classifier']
+    model = models['dog_classifier']
 
     img = cv2.resize(img, (224, 224))
     img_4d = np.reshape(img, (1, img.shape[0], img.shape[1], img.shape[2]))
     pred_label = np.argmax(model.predict(img_4d))
 
     return ((pred_label >= 151) & (pred_label <= 268))
+
+def get_dog_breed(img):
+    img = cv2.resize(img, (224, 224))
+    img = img.reshape(1, img.shape[0], img.shape[1], img.shape[2])
+    img = InceptionV3(weights='imagenet', include_top=False).predict(preprocess_input(img))
+    model = models['breed_classifier']
+    pred  = model.predict(img)
+    index = np.argmax(pred)
+
+    with open('dog_names.pkl', 'rb') as pf:
+        dog_names = pickle.load(pf)
+
+    return dog_names[index]
 
 @app.route('/')
 @app.route('/test', methods=["GET","POST"])
@@ -83,10 +98,11 @@ def dog_classify():
             arr_gray  = img_to_array(img_gray, dtype='uint8')
             arr_color = img_to_array(img_color)
 
-            human   = is_human(arr_gray)
-            dog     = is_dog(arr_color)
-            return str(dog)
-            #return "TESTING\n"
+            human = is_human(arr_gray)
+            dog   = is_dog(arr_color)
+            breed = get_dog_breed(arr_color)
+
+            return str(breed)
 
         else:
             return "POST dog image."
