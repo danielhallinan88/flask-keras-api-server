@@ -34,14 +34,14 @@ def is_human(img):
 def is_dog(img):
     model = models['dog_classifier']
 
-    img = cv2.resize(img, (224, 224))
+#    img = cv2.resize(img, (224, 224))
     img_4d = np.reshape(img, (1, img.shape[0], img.shape[1], img.shape[2]))
     pred_label = np.argmax(model.predict(img_4d))
 
     return ((pred_label >= 151) & (pred_label <= 268))
 
 def get_dog_breed(img):
-    img = cv2.resize(img, (224, 224))
+#    img = cv2.resize(img, (224, 224))
     img = img.reshape(1, img.shape[0], img.shape[1], img.shape[2])
     img = InceptionV3(weights='imagenet', include_top=False).predict(preprocess_input(img))
     model = models['breed_classifier']
@@ -91,9 +91,11 @@ def dog_classify():
             data = request.files.get('image')
 
             # Grayscale image
-            img_gray  = load_img(data, color_mode='grayscale')
+            img_gray  = load_img(data, color_mode='grayscale', target_size=(224, 224))
+#            img_gray  = load_img(data, color_mode='grayscale')
             # Color image
-            img_color = load_img(data)
+#            img_color = load_img(data)
+            img_color = load_img(data, target_size=(224, 224))
 
             arr_gray  = img_to_array(img_gray, dtype='uint8')
             arr_color = img_to_array(img_color)
@@ -102,6 +104,7 @@ def dog_classify():
             dog   = is_dog(arr_color)
             breed = get_dog_breed(arr_color)
 
+            print(human, dog, breed)
             return str(breed)
 
         else:
