@@ -1,5 +1,6 @@
 import argparse
 import requests
+import pprint
 import sys
 
 def validate(args):
@@ -34,10 +35,9 @@ def main():
         files = {'image' : open(image, 'rb')}
         r     = requests.post(url=url, files=files)
 
-    #print(dir(r))
     print(r.status_code)
+    #print(r.json())
     print(r.text)
-    print(r.json())
 
 if __name__ == "__main__":
     main()

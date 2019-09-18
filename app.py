@@ -56,45 +56,65 @@ def get_dog_breed(img):
 @app.route('/')
 @app.route('/test', methods=["GET","POST"])
 def test():
+    output = {'values' : "Test Succeeded!"}
+
     if request.method == "POST":
         return test_string
     else:
         if 'num' in request.args.keys():
             return request.args['num']
         else:
-            return "Test Succeeded!"
+            return jsonify(output)
 
 @app.route('/mnist', methods=["GET","POST"])
 def mnist():
-    model = models['mnist']
+    model  = models['mnist']
+    output = {
+              'image_file'  : None,
+              'image_shape' : None,
+              'prediction'  : None,
+              'error'       : None,
+             }
 
     with graph.as_default():
         if request.method == "POST":
             data = request.files.get("image")
+            output['image_file']  = str(data.filename)
+
             img        = Image.open(data)
             img_arr    = np.array(img, dtype='float32')
             img_arr_sh = img_arr.reshape(1, 28, 28, 1)
             prediction = model.predict(img_arr_sh)
             result     = np.argmax(prediction)
-            return str(result)
+
+            output['image_shape'] = str(img_arr.shape)
+            output['prediction']  = str(result)
+
         else:
-            return "Please POST an image."
+            output['error'] = "Please POST an image."
+
+        return jsonify(output)
 
 @app.route('/dog-classifier', methods=['GET', 'POST'])
 def dog_classify():
+    output = {
+              'image_file' : None,
+              'is_human'   : False,
+              'is_dog'     : False,
+              'dog_breed'  : None,
+              'error'      : None,
+             }
 
     with graph.as_default():
-        model = models['dog_classifier']
 
         if request.method == 'POST':
             # Preprocess image
             data = request.files.get('image')
+            output['image_file'] = str(data.filename)
 
             # Grayscale image
             img_gray  = load_img(data, color_mode='grayscale', target_size=(224, 224))
-#            img_gray  = load_img(data, color_mode='grayscale')
             # Color image
-#            img_color = load_img(data)
             img_color = load_img(data, target_size=(224, 224))
 
             arr_gray  = img_to_array(img_gray, dtype='uint8')
@@ -104,11 +124,18 @@ def dog_classify():
             dog   = is_dog(arr_color)
             breed = get_dog_breed(arr_color)
 
-            print(human, dog, breed)
-            return str(breed)
+            output['is_human']  = str(human)
+            output['is_dog']    = str(dog)
+            output['dog_breed'] = str(breed)
+
+            #print(human, dog, breed)
+            #return str(breed)
 
         else:
-            return "POST dog image."
+            output['error'] = "POST dog image."
+            #return "POST dog image."
+
+        return jsonify(output)
 
 if __name__ == "__main__":
     load_models()
