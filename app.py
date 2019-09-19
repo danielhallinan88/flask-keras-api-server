@@ -4,14 +4,17 @@ from keras.models import load_model
 from keras.preprocessing.image import img_to_array, load_img
 from keras.applications.resnet50 import ResNet50, decode_predictions
 from keras.applications.inception_v3 import InceptionV3, preprocess_input
+import keras
 import tensorflow as tf
 import numpy as np
 import pickle
+import time
 import cv2
 import os
 
 app = Flask(__name__)
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+keras.backend.set_learning_phase(0)
 
 def load_models():
     global models
@@ -34,18 +37,21 @@ def is_human(img):
 def is_dog(img):
     model = models['dog_classifier']
 
-#    img = cv2.resize(img, (224, 224))
     img_4d = np.reshape(img, (1, img.shape[0], img.shape[1], img.shape[2]))
     pred_label = np.argmax(model.predict(img_4d))
 
     return ((pred_label >= 151) & (pred_label <= 268))
 
 def get_dog_breed(img):
-#    img = cv2.resize(img, (224, 224))
-    img = img.reshape(1, img.shape[0], img.shape[1], img.shape[2])
+
+    # Reshaping hack to (1, 224, 244, 3)
+    img = np.array([img])
+    #img = img.reshape(1, img.shape[0], img.shape[1], img.shape[2])
     img = InceptionV3(weights='imagenet', include_top=False).predict(preprocess_input(img))
+
     model = models['breed_classifier']
     pred  = model.predict(img)
+
     index = np.argmax(pred)
 
     with open('dog_names.pkl', 'rb') as pf:
@@ -99,6 +105,7 @@ def mnist():
 def dog_classify():
     output = {
               'image_file' : None,
+              'image_shape': None,
               'is_human'   : False,
               'is_dog'     : False,
               'dog_breed'  : None,
@@ -114,6 +121,7 @@ def dog_classify():
 
             # Grayscale image
             img_gray  = load_img(data, color_mode='grayscale', target_size=(224, 224))
+
             # Color image
             img_color = load_img(data, target_size=(224, 224))
 
@@ -124,9 +132,10 @@ def dog_classify():
             dog   = is_dog(arr_color)
             breed = get_dog_breed(arr_color)
 
-            output['is_human']  = str(human)
-            output['is_dog']    = str(dog)
-            output['dog_breed'] = str(breed)
+            output['image_shape'] = str(arr_color.shape)
+            output['is_human']    = str(human)
+            output['is_dog']      = str(dog)
+            output['dog_breed']   = str(breed)
 
             #print(human, dog, breed)
             #return str(breed)
