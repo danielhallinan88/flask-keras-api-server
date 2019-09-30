@@ -1,0 +1,8 @@
+sudo apt install libsm6 libxext6 libxrender1 libfontconfig1
+sudo curl -O https://bootstrap.pypa.io/get-pip.py
+python3 get-pip.py --user
+
+pip3 install virtualenv
+virtualenv venv
+source venv/bin/activate
+pip3 install -r requirements
