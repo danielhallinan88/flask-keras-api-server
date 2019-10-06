@@ -12,21 +12,21 @@ import time
 import cv2
 import os
 
-app = Flask(__name__)
+application = Flask(__name__)
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 keras.backend.set_learning_phase(0)
 
-def load_models():
-    global models
-    models = {
-              'mnist'            : load_model('models/mnist_model.hdf5'),
-              'breed_classifier' : load_model('models/dog-classifier.weights.best.inception3.hdf5'),
-              'dog_classifier'   : ResNet50(weights='imagenet'),
-              'face_classifier'  : cv2.CascadeClassifier('models/haarcascade_frontalface_alt.xml'),
-              }
+global models
+models = {
+          'mnist'            : load_model('models/mnist_model.hdf5'),
+          'breed_classifier' : load_model('models/dog-classifier.weights.best.inception3.hdf5'),
+          'dog_classifier'   : ResNet50(weights='imagenet'),
+          'face_classifier'  : cv2.CascadeClassifier('models/haarcascade_frontalface_alt.xml'),
+          }
 
-    global graph
-    graph = tf.get_default_graph()
+global graph
+graph = tf.get_default_graph()
+
 
 def is_human(img):
     model = models['face_classifier']
@@ -59,8 +59,8 @@ def get_dog_breed(img):
 
     return dog_names[index]
 
-@app.route('/')
-@app.route('/test', methods=["GET","POST"])
+@application.route('/')
+@application.route('/test', methods=["GET","POST"])
 def test():
     output = {'values' : "Test Succeeded!"}
 
@@ -72,7 +72,7 @@ def test():
         else:
             return jsonify(output)
 
-@app.route('/mnist', methods=["GET","POST"])
+@application.route('/mnist', methods=["GET","POST"])
 def mnist():
     model  = models['mnist']
     output = {
@@ -101,7 +101,7 @@ def mnist():
 
         return jsonify(output)
 
-@app.route('/dog-classifier', methods=['GET', 'POST'])
+@application.route('/dog-classifier', methods=['GET', 'POST'])
 def dog_classify():
     output = {
               'image_file' : None,
@@ -137,15 +137,10 @@ def dog_classify():
             output['is_dog']      = str(dog)
             output['dog_breed']   = str(breed)
 
-            #print(human, dog, breed)
-            #return str(breed)
-
         else:
             output['error'] = "POST dog image."
-            #return "POST dog image."
 
         return jsonify(output)
 
 if __name__ == "__main__":
-    load_models()
-    app.run(host='0.0.0.0')
+    application.run(host='0.0.0.0')
