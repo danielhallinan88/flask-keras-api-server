@@ -1,0 +1,9 @@
+[2019-10-06 18:50:14 +0000] [5019] [INFO] Starting gunicorn 19.9.0
+[2019-10-06 18:50:14 +0000] [5019] [INFO] Listening at: http://0.0.0.0:5000 (5019)
+[2019-10-06 18:50:14 +0000] [5019] [INFO] Using worker: sync
+[2019-10-06 18:50:14 +0000] [5022] [INFO] Booting worker with pid: 5022
+[2019-10-06 18:50:14 +0000] [5023] [INFO] Booting worker with pid: 5023
+[2019-10-06 18:50:35 +0000] [5019] [INFO] Handling signal: int
+[2019-10-06 18:50:35 +0000] [5022] [INFO] Worker exiting (pid: 5022)
+[2019-10-06 18:50:35 +0000] [5023] [INFO] Worker exiting (pid: 5023)
+[2019-10-06 18:50:36 +0000] [5019] [INFO] Shutting down: Master
