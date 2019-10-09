@@ -18,10 +18,10 @@ keras.backend.set_learning_phase(0)
 
 global models
 models = {
-          'mnist'            : load_model('models/mnist_model.hdf5'),
-          'breed_classifier' : load_model('models/dog-classifier.weights.best.inception3.hdf5'),
+          'mnist'            : load_model('/home/ubuntu/flask-keras-api-server/models/mnist_model.hdf5'),
+          'breed_classifier' : load_model('/home/ubuntu/flask-keras-api-server/models/dog-classifier.weights.best.inception3.hdf5'),
           'dog_classifier'   : ResNet50(weights='imagenet'),
-          'face_classifier'  : cv2.CascadeClassifier('models/haarcascade_frontalface_alt.xml'),
+          'face_classifier'  : cv2.CascadeClassifier('/home/ubuntu/flask-keras-api-server/models/haarcascade_frontalface_alt.xml'),
           }
 
 global graph
@@ -54,7 +54,7 @@ def get_dog_breed(img):
 
     index = np.argmax(pred)
 
-    with open('dog_names.pkl', 'rb') as pf:
+    with open('/home/ubuntu/flask-keras-api-server/dog_names.pkl', 'rb') as pf:
         dog_names = pickle.load(pf)
 
     return dog_names[index]
