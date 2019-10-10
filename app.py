@@ -4,17 +4,20 @@ from keras.models import load_model
 from keras.preprocessing.image import img_to_array, load_img
 from keras.applications.resnet50 import ResNet50, decode_predictions
 from keras.applications.inception_v3 import InceptionV3, preprocess_input
-import keras
+from keras.backend import set_learning_phase
 import tensorflow as tf
 import numpy as np
+import warnings
 import pickle
 import time
 import cv2
 import os
 
 application = Flask(__name__)
+
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
-keras.backend.set_learning_phase(0)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+set_learning_phase(0)
 
 global models
 models = {
