@@ -1,10 +1,10 @@
-sudo apt install libsm6 libxext6 libxrender1 libfontconfig1 nginx
+sudo apt install libsm6 libxext6 libxrender1 libfontconfig1 nginx supervisor
 sudo curl -O https://bootstrap.pypa.io/get-pip.py
 python3 get-pip.py --user
 
 export PATH=$PATH:/home/ubuntu/.local/bin
 
-pip3 install virtualenv gunicorn
+pip3 install virtualenv
 virtualenv venv
 source venv/bin/activate
 pip3 install -r requirements
