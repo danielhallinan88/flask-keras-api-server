@@ -1,0 +1,4 @@
+https://medium.com/ymedialabs-innovation/deploy-flask-app-with-nginx-using-gunicorn-and-supervisor-d7a93aa07c18
+
+This directly are backups of necessary server config files.
+Use the above tutorial for configuring flask with nginx and supervisor.
