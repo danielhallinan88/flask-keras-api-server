@@ -73,7 +73,10 @@ def test():
         if 'num' in request.args.keys():
             return request.args['num']
         else:
-            return jsonify(output)
+            response = jsonify(output)
+            response.headers.add('Access-Control-Allow-Origin', '*')
+            return response
+            #return jsonify(output)
 
 @application.route('/mnist', methods=["GET","POST"])
 def mnist():
@@ -102,9 +105,12 @@ def mnist():
         else:
             output['error'] = "Please POST an image."
 
-        return jsonify(output)
+        response = jsonify(output)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
+        #return jsonify(output)
 
-@application.route('/dog-classifier', methods=['GET', 'POST'])
+@application.route('/dog-classifier', methods=['GET', 'POST', 'PUT'])
 def dog_classify():
     output = {
               'image_file' : None,
@@ -116,10 +122,15 @@ def dog_classify():
              }
 
     with graph.as_default():
+        test = {'test': 'does this return'}
 
         if request.method == 'POST':
+
             # Preprocess image
             data = request.files.get('image')
+            #REMOVE
+            #return jsonify({'test': data.filename})
+        
             output['image_file'] = str(data.filename)
 
             # Grayscale image
