@@ -1,5 +1,6 @@
 from PIL import Image
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from keras.models import load_model
 from keras.preprocessing.image import img_to_array, load_img
 from keras.applications.resnet50 import ResNet50, decode_predictions
@@ -14,6 +15,7 @@ import cv2
 import os
 
 application = Flask(__name__)
+CORS(application)
 
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
