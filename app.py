@@ -97,12 +97,10 @@ def mnist():
 
             img        = Image.open(data)
             img_arr    = np.array(img, dtype='float32')
-            #with open('shapes.log','w') as fh:
-            #    fh.write("Shape: {}\n".format(img_arr.shape))
-            #    rgb_weights = [0.2989, 0.5870, 0.1140]
-            #    grayscale_image = np.dot(img_arr[...,:3], rgb_weights)
-            #    fh.write("Gray Shape: {}".format(grayscale_image.shape))
-            img_arr_sh = img_arr.reshape(1, 28, 28, 1)
+            res = cv2.resize(img_arr, dsize=(28,28), interpolation=cv2.INTER_CUBIC)
+            gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
+            img_arr_sh = gray.reshape(1, 28, 28, 1)
+
             prediction = model.predict(img_arr_sh)
             result     = np.argmax(prediction)
 
